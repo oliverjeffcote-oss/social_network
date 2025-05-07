@@ -49,7 +49,7 @@ There are two videos to support:
 
 > `YOUR_PROJECT_NAME` can be anything you want it to be
 
-### 7. Open `lib/database_connection.py` and change the database name to `YOUR_PROJECT_NAME`
+### 7. Change `DATABASE_NAME` to equal `YOUR_PROJECT_NAME`
 
 On line 11 of `lib/database_connection.py` you'll find this...
 
