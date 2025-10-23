@@ -141,3 +141,196 @@ CREATE TABLE posts (
 ```bash
 psql -h 127.0.0.1 database_name < albums_table.sql
 ```
+
+# {{TABLE NAME}} Model and Repository Classes Design Recipe
+
+_Copy this recipe template to design and implement Model and Repository classes for a database table._
+
+## 1. Design and create the Table
+
+If the table is already created in the database, you can skip this step.
+
+Otherwise, [follow this recipe to design and create the SQL schema for your table](https://journey.makers.tech/pages/single-table-design-recipe-template).
+
+*In this template, we'll use an example table `students`*
+
+```
+# EXAMPLE
+
+Table: students
+
+Columns:
+id | name | cohort_name
+```
+
+## 2. Create Test SQL seeds
+
+Your tests will depend on data stored in PostgreSQL to run.
+
+If seed data is provided (or you already created it), you can skip this step.
+
+```sql
+-- EXAMPLE
+-- (file: spec/seeds_{table_name}.sql)
+
+-- Write your SQL seed here. 
+
+-- First, you'd need to truncate the table - this is so our table is emptied between each test run,
+-- so we can start with a fresh state.
+-- (RESTART IDENTITY resets the primary key)
+
+TRUNCATE TABLE students RESTART IDENTITY; -- replace with your own table name.
+
+-- Below this line there should only be `INSERT` statements.
+-- Replace these statements with your own seed data.
+
+INSERT INTO students (name, cohort_name) VALUES ('David', 'April 2022');
+INSERT INTO students (name, cohort_name) VALUES ('Anna', 'May 2022');
+```
+
+Run this SQL file on the database to truncate (empty) the table, and insert the seed data. Be mindful of the fact any existing records in the table will be deleted.
+
+```bash
+psql -h 127.0.0.1 your_database_name < seeds_{table_name}.sql
+```
+
+## 3. Define the class names
+
+Usually, the Model class name will be the capitalised table name (single instead of plural). The same name is then suffixed by `Repository` for the Repository class name.
+
+```python
+# EXAMPLE
+# Table name: accounts
+
+# Model class
+# (in lib/account.py)
+class Account
+
+
+# Repository class
+# (in lib/account_repository.py)
+class AccountRepository
+
+# EXAMPLE
+# Table name: posts
+
+# Model class
+# (in lib/post.py)
+class Post
+
+
+# Repository class
+# (in lib/post_repository.py)
+class PostRepository
+
+```
+
+## 4. Implement the Model class
+
+Define the attributes of your Model class. You can usually map the table columns to the attributes of the class, including primary and foreign keys.
+
+```python
+
+class Account:
+    def __init__(self, id, email_address, username):
+        self.id = id
+        self.email_address = email_address
+        self.username = username
+
+class Post:
+    def __init__(self, title, content, views, account_id):
+        self.title = title,
+        self.content = content, 
+        self.views = views,
+        self.account_id = account_id
+
+```
+
+## 5. Define the Repository Class interface
+
+Your Repository class will need to implement methods for each "read" or "write" operation you'd like to run against the database.
+
+Using comments, define the method signatures (arguments and return value) and what they do - write up the SQL queries that will be used by each method.
+
+```python
+
+class AccountRepository():
+
+    def all():
+        # Executes the SQL query:
+        # SELECT * FROM accounts;
+
+        # Returns an array of Student objects.
+        
+    def find(id):
+        # Executes the SQL query:
+        # SELECT id, name, cohort_name FROM students WHERE id = $1;
+
+        # Gets a single record by its ID
+        # One argument: the id (number)
+
+        # Returns a single Student object.
+
+    def create(account):
+
+        # Executes the SQL query:
+        # INSERT INTO accounts (email_address, username) VALUES (%s, %s);
+
+        # Takes one arg, an instance of account that contains email_address and username details.
+
+        # Returns nothing
+
+    # def update(student)
+    # 
+
+    # def delete(student)
+    # 
+
+```
+
+## 6. Write Test Examples
+
+Write Python code that defines the expected behaviour of the Repository class, following your design from the table written in step 5.
+
+These examples will later be encoded as Pytest tests.
+
+```python
+# EXAMPLES
+
+# 1
+# Get all students
+
+repo = StudentRepository()
+
+students = repo.all()
+
+len(students) # =>  2
+
+students[0].id # =>  1
+students[0].name # =>  'David'
+students[0].cohort_name # =>  'April 2022'
+
+students[1].id # =>  2
+students[1].name # =>  'Anna'
+students[1].cohort_name # =>  'May 2022'
+
+# 2
+# Get a single student
+
+repo = StudentRepository()
+
+student = repo.find(1)
+
+student.id # =>  1
+student.name # =>  'David'
+student.cohort_name # =>  'April 2022'
+
+# Add more examples for each method
+```
+
+Encode this example as a test.
+
+
+## 7. Test-drive and implement the Repository class behaviour
+
+_After each test you write, follow the test-driving process of red, green, refactor to implement the behaviour._
