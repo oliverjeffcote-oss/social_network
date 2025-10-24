@@ -17,3 +17,12 @@ def test_all_returns_user_accounts(db_connection):
         Account(3, 'kendrick.lamar@example.com', 'KDot'),
         Account(4, 'daft.punk@example.com', 'DPunk')
     ]
+
+def test_find_returns_one_account(db_connection):
+
+    repo = AccountRepository(db_connection)
+
+    assert repo.find(2) == [
+        Account(2, 'joan.baez@example.com', 'JoanB')
+    ]
+
